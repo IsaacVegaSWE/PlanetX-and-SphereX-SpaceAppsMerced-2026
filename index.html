@@ -224,7 +224,6 @@ footer {
 <div class="card" id="meta"></div>
 <div class="card"><b id="sn">Spectrum</b><canvas id="sp" width="520" height="220"></canvas></div>
 </aside></div>
-<footer id="ft">These frames are simulated from real target positions and approximate proper motions, with six detector bands of 17 channels each. To go live, replace <code>sim()</code> with a loader for SPHEREx cutouts from IRSA; the display, stacking and spectrum code reads only the arrays it produces. Self-hosted copies also accept <code>?ra=&amp;dec=&amp;fov=</code>.</footer>
 </main><script>
 const $=i=>document.getElementById(i),K=12,PX=6.15,T0=2025.45,DT=.12,CL=400;
 const DET=[[.75,1.09],[1.1,1.62],[1.63,2.41],[2.42,3.82],[3.83,4.41],[4.42,5]],DC=DET.map(([a,b])=>(a+b)/2);
@@ -245,7 +244,9 @@ const pix=(ra,dec)=>[S.n/2-(ra-S.ra)*Math.cos(S.dec*Math.PI/180)*3600/PX,S.n/2-(
 function parse(s,ra){s=s.trim().replace(/−/g,'-');const m=s.match(/^(-?\+?\d+(?:\.\d+)?)[h:\s°d]+(\d+(?:\.\d+)?)[m:'\s′]+(\d+(?:\.\d+)?)/i);
  if(m){let v=Math.abs(parseFloat(m[1]))+m[2]/60+m[3]/3600;if(/^-/.test(m[1]))v=-v;return ra?v*15:v}return parseFloat(s)}
 /* Data layer: replace sim() with real SPHEREx cutouts. It must fill S.F[visit][detector] (n*n Float32Array),
-   S.fl[visit][detector] (flag strings) and S.O[visit] (source list used for overlay and spectra). */
+   S.fl[visit][detector] (flag strings) and S.O[visit] (source list used for overlay and spectra). 
+   <footer id="ft">These frames are simulated from real target positions and approximate proper motions, with six detector bands of 17 channels each. To go live, replace <code>sim()</code> with a loader for SPHEREx cutouts from IRSA; the display, stacking and spectrum code reads only the arrays it produces. Self-hosted copies also accept <code>?ra=&amp;dec=&amp;fov=</code>.</footer>
+*/
 function sim(ra,dec,fov){
  const n=Math.max(12,Math.round(fov*60/PX)),seed=Math.round(ra*997+dec*1013)^fov;
  S={ra,dec,fov,n,k:0,sel:-1,F:[],fl:[],O:[],T:Array.from({length:K},(_,k)=>T0+k*DT)};
