@@ -1,0 +1,345 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>EZEPOCH: SPHEREx</title>
+<style>
+:root {
+  --bg:#eef1f5;
+  --fg:#0b1530;
+  --mu:#5a6478;
+  --cd:#fff;
+  --bd:#cfd6e2;
+  --ac:#3b4fd1;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+@media(prefers-color-scheme:dark) {
+  :root:not([data-theme="light"]) {
+    --bg:#090e1c;
+    --fg:#e6eaf5;
+    --mu:#93a0ba;
+    --cd:#111933;
+    --bd:#26315a;
+    --ac:#8fa2ff;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg:#090e1c;
+  --fg:#e6eaf5;
+  --mu:#93a0ba;
+  --cd:#111933;
+  --bd:#26315a;
+  --ac:#8fa2ff;
+  color-scheme:dark;
+}
+html {
+  scroll-padding-top:env(safe-area-inset-top,0px);
+}
+body {
+  margin:0;
+  background:var(--bg);
+  color:var(--fg);
+  font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+main {
+  max-width:1060px;
+  margin:0 auto;
+  padding:20px 16px 32px;
+}
+h1 {
+  font-size:clamp(28px,5vw,44px);
+  line-height:1.05;
+  letter-spacing:-.03em;
+  margin:0 0 6px;
+  font-weight:700;
+}
+.sub {
+  color:var(--mu);
+  max-width:62ch;
+  margin:0 0 16px;
+}
+.pill {
+  display:inline-block;
+  font-size:12px;
+  font-weight:600;
+  color:var(--ac);
+  border:1px solid var(--ac);
+  border-radius:99px;
+  padding:1px 9px;
+  vertical-align:middle;
+  margin-left:8px;
+  letter-spacing:0;
+}
+.bar {
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  align-items:end;
+  margin-bottom:10px;
+}
+label {
+  display:flex;
+  flex-direction:column;
+  font-size:13px;
+  color:var(--mu);
+  gap:3px;
+}
+input,select,button {
+  font:inherit;
+  color:var(--fg);
+  background:var(--cd);
+  border:1px solid var(--bd);
+  border-radius:6px;
+  padding:6px 9px;
+}
+input[type=text] {
+  width:150px;
+}
+button {
+  cursor:pointer;
+}
+button.pr {
+  background:var(--ac);
+  border-color:var(--ac);
+  color:#fff;
+  font-weight:600;
+}
+:focus-visible {
+  outline:2px solid var(--ac);
+  outline-offset:2px;
+}
+.chips {
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-bottom:16px;
+}
+.chips button {
+  border-radius:99px;
+  font-size:13px;
+  padding:3px 12px;
+}
+.grid {
+  display:grid;
+  gap:20px;
+  grid-template-columns:minmax(0,560px) minmax(0,1fr);
+}
+@media(max-width:860px) {
+  .grid {
+    grid-template-columns:1fr;
+  }
+}
+.view {
+  position:relative;
+  width:100%;
+  max-width:560px;
+  aspect-ratio:1;
+  background:#000;
+  border-radius:6px;
+  overflow:hidden;
+}
+.view canvas {
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+}
+#cv {
+  image-rendering:pixelated;
+}
+#ov {
+  cursor:crosshair;
+}
+.nav {
+  position:absolute;
+  left:8px;
+  bottom:6px;
+  font-size:12px;
+  color:#9fb0d8;
+}
+.tr {
+  display:flex;
+  gap:10px;
+  align-items:center;
+  margin-top:10px;
+  max-width:560px;
+}
+.tr input {
+  flex:1;
+}
+.ctl {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-bottom:12px;
+}
+.ck {
+  flex-direction:row;
+  align-items:center;
+  gap:8px;
+  grid-column:1/-1;
+  color:var(--fg);
+}
+.card {
+  background:var(--cd);
+  border:1px solid var(--bd);
+  border-radius:8px;
+  padding:10px 12px;
+  margin-bottom:12px;
+  font-size:14px;
+}
+.card b {
+  font-weight:600;
+}
+#sp {
+  width:100%;
+  height:auto;
+  display:block;
+}
+footer {
+  margin-top:20px;
+  color:var(--mu);
+  font-size:13px;
+  max-width:80ch;
+}
+</style></head><body><main>
+<h1>EZEPOCH <span class="pill" id="pill">simulated frames</span></h1>
+<p class="sub">Pick a patch of sky and watch it change across SPHEREx visits. Moving objects hop between frames, variable stars pulse, and cosmic-ray hits appear in a single frame only.</p>
+<div class="bar">
+<label>Right ascension<input type="text" id="ra" placeholder="08h55m10.831s"></label>
+<label>Declination<input type="text" id="dec" placeholder="-7d14m42.53s"></label>
+<label>Field of view<select id="fov"><option value="2">2 arcmin</option><option value="4">4 arcmin</option><option value="8">8 arcmin</option><option value="16">16 arcmin</option></select></label>
+<button class="pr" id="go">Show sky</button></div>
+<div class="chips" id="pre"></div>
+<div class="grid"><section>
+<div class="view"><canvas id="cv"></canvas><canvas id="ov" width="560" height="560"></canvas><span class="nav">North up, east left</span></div>
+<div class="tr"><button id="pl">Pause</button><input type="range" id="sl" min="0" max="11" value="0" aria-label="Visit"><span id="ep"></span></div>
+</section><aside>
+<div class="ctl">
+<label>Detector<select id="det"></select></label>
+<label>Display<select id="mode"><option value="raw">Images</option><option value="first">Minus first visit</option><option value="med">Minus median visit</option></select></label>
+<label>Add visits together<select id="stk"><option>1</option><option>2</option><option>3</option><option>4</option></select></label>
+<label>Speed<select id="spd"><option value="500">Slow</option><option value="250" selected>Medium</option><option value="120">Fast</option></select></label>
+<label class="ck"><input type="checkbox" id="cat" checked>Show catalog overlay and motion trail</label></div>
+<div class="card" id="meta"></div>
+<div class="card"><b id="sn">Spectrum</b><canvas id="sp" width="520" height="220"></canvas></div>
+</aside></div>
+<footer id="ft">These frames are simulated from real target positions and approximate proper motions, with six detector bands of 17 channels each. To go live, replace <code>sim()</code> with a loader for SPHEREx cutouts from IRSA; the display, stacking and spectrum code reads only the arrays it produces. Self-hosted copies also accept <code>?ra=&amp;dec=&amp;fov=</code>.</footer>
+</main><script>
+const $=i=>document.getElementById(i),K=12,PX=6.15,T0=2025.45,DT=.12,CL=400;
+const DET=[[.75,1.09],[1.1,1.62],[1.63,2.41],[2.42,3.82],[3.83,4.41],[4.42,5]],DC=DET.map(([a,b])=>(a+b)/2);
+const st=p=>l=>Math.pow(l/1.6,-p),TD=l=>.9*Math.exp(-(((l-1.1)/.3)**2))+.35*Math.exp(-(((l-4.3)/.55)**2))+.04,YD=l=>.002+Math.exp(-(((l-4.5)/.55)**2));
+const CAT=[
+{n:'Barnard’s Star',ra:269.45208,dec:4.69336,pm:[-798.6,10328.1],e:2000,a:1500,s:st(2.2)},
+{n:'ε Indi A',ra:330.84022,dec:-56.78598,pm:[3966.4,-2536.2],e:2000,a:1200,s:st(2.2)},
+{n:'ε Indi Ba/Bb',ra:331.0437,dec:-56.7828,pm:[3966.4,-2536.2],e:2000,a:120,s:TD},
+{n:'WISE 0855−0714',ra:133.79513,dec:-7.24515,pm:[-8100,700],e:2014,a:40,s:YD},
+{n:'RW Aur',ra:76.9565,dec:30.40144,pm:[0,0],e:2000,a:100,s:st(.8),v:t=>1-.65*Math.exp(-(((t-2026.15)/.1)**2))},
+{n:'R Dra',ra:248.17458,dec:66.7553,pm:[0,0],e:2000,a:800,s:st(2.5),v:(t,l)=>1+.55/(1+l/2)*Math.sin(2*Math.PI*(t-2025.2)/.672)}];
+const PRE=[['barnards-star','Barnard’s Star',[0],4],['epsilon-indi','ε Indi A and B',[1,2],16],['wise-0855','WISE 0855',[3],4],['rw-aur','RW Aur',[4],4],['r-dra','R Dra',[5],4]];
+let S={},play=true,ms=250,pid='',job=0;const API=new URLSearchParams(location.search).get('api')??(location.protocol.startsWith('http')?'':null);
+function rng(s){return()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const gauss=r=>Math.sqrt(-2*Math.log(r()+1e-12))*Math.cos(6.2832*r());
+const at=(o,t)=>{const d=t-o.e;return[o.ra+o.pm[0]*d/3.6e6/Math.cos(o.dec*Math.PI/180),o.dec+o.pm[1]*d/3.6e6]};
+const pix=(ra,dec)=>[S.n/2-(ra-S.ra)*Math.cos(S.dec*Math.PI/180)*3600/PX,S.n/2-(dec-S.dec)*3600/PX];
+function parse(s,ra){s=s.trim().replace(/−/g,'-');const m=s.match(/^(-?\+?\d+(?:\.\d+)?)[h:\s°d]+(\d+(?:\.\d+)?)[m:'\s′]+(\d+(?:\.\d+)?)/i);
+ if(m){let v=Math.abs(parseFloat(m[1]))+m[2]/60+m[3]/3600;if(/^-/.test(m[1]))v=-v;return ra?v*15:v}return parseFloat(s)}
+/* Data layer: replace sim() with real SPHEREx cutouts. It must fill S.F[visit][detector] (n*n Float32Array),
+   S.fl[visit][detector] (flag strings) and S.O[visit] (source list used for overlay and spectra). */
+function sim(ra,dec,fov){
+ const n=Math.max(12,Math.round(fov*60/PX)),seed=Math.round(ra*997+dec*1013)^fov;
+ S={ra,dec,fov,n,k:0,sel:-1,F:[],fl:[],O:[],T:Array.from({length:K},(_,k)=>T0+k*DT)};
+ const R=rng(seed),bg=[];
+ for(let i=0,N=Math.round(14*(fov/4)**2);i<N;i++)bg.push({x:R()*n,y:R()*n,a:3/Math.pow(.02+.98*R(),.8),s:st(1.5+1.5*R()),n:'Background star'});
+ S.nb=bg.length;
+ for(let k=0;k<K;k++){
+  const t=T0+k*DT,O=bg.concat(CAT.map(o=>{const[a,b]=at(o,t),[x,y]=pix(a,b);return{x,y,a:o.a,s:o.s,v:o.v,n:o.n}}));
+  S.O.push(O);const row=[],fr=[];
+  for(let d=0;d<6;d++){
+   const im=new Float32Array(n*n),Rn=rng(seed*31+k*7+d),l=DC[d],f=[];
+   for(let i=0;i<n*n;i++)im[i]=gauss(Rn);
+   O.forEach(o=>{if(o.x<-4||o.y<-4||o.x>n+4||o.y>n+4)return;const q=o.a*o.s(l)*(o.v?o.v(t,l):1)*.196;
+    for(let j=Math.max(0,Math.floor(o.y-4));j<Math.min(n,o.y+4);j++)for(let i=Math.max(0,Math.floor(o.x-4));i<Math.min(n,o.x+4);i++)im[j*n+i]+=q*Math.exp(-((i+.5-o.x)**2+(j+.5-o.y)**2)/1.62)});
+   if(Rn()<.25){im[Rn()*n*n|0]+=60+Rn()*60;f.push('COSMIC_RAY')}
+   let sat=0;for(let i=0;i<n*n;i++)if(im[i]>=CL){im[i]=CL;sat=1}
+   if(sat)f.push('SATURATED');row.push(im);fr.push(f)}
+  S.F.push(row);S.fl.push(fr)}
+ let bd=1e9;S.O[5].forEach((o,i)=>{if(i<S.nb)return;const d=Math.hypot(o.x-n/2,o.y-n/2);if(d<n/2&&d<bd){bd=d;S.sel=i}});
+}
+function proc(){
+ const n=S.n,L=n*n,det=$('det').value,mode=$('mode').value,N=+$('stk').value;
+ const base=S.F.map(r=>{if(det!=='all')return r[+det];const a=new Float32Array(L);r.forEach(f=>{for(let i=0;i<L;i++)a[i]+=f[i]});return a});
+ let im=base.map((_,k)=>{const a=new Float32Array(L),m=Math.min(N,K-k);for(let j=0;j<m;j++){const b=base[k+j];for(let i=0;i<L;i++)a[i]+=b[i]/m}return a});
+ if(mode!=='raw'){let ref;if(mode==='first')ref=im[0];else{ref=new Float32Array(L);const t=new Float32Array(K);
+  for(let i=0;i<L;i++){for(let k=0;k<K;k++)t[k]=im[k][i];t.sort();ref[i]=(t[5]+t[6])/2}}
+  im=im.map(a=>a.map((v,i)=>v-ref[i]))}
+ const all=new Float32Array(K*L);im.forEach((a,k)=>all.set(a,k*L));all.sort();
+ const q=p=>all[Math.min(all.length-1,Math.floor(p*all.length))];
+ S.im=im;S.sc=mode==='raw'?{d:0,b:q(.5),h:Math.max(q(.99)-q(.5),8)}:{d:1,b:0,h:Math.max(q(.995),-q(.005),8)};
+}
+const A=x=>Math.asinh(4*x)/Math.asinh(4);
+function draw(){
+ const n=S.n,c=$('cv').getContext('2d'),id=c.createImageData(n,n),im=S.im[S.k],{d,b,h}=S.sc;
+ for(let i=0;i<n*n;i++){let r,g,u,t;
+  if(!d){t=Math.max(0,Math.min(1,A((im[i]-b)/h)));r=g=u=t*255}
+  else{t=A(Math.max(-1,Math.min(1,im[i]/h)));if(t>=0){r=24+231*t;g=24+150*t;u=28+60*t}else{t=-t;r=24+30*t;g=24+120*t;u=28+227*t}}
+  id.data.set([r,g,u,255],i*4)}
+ c.putImageData(id,0,0)}
+function ovl(){
+ const c=$('ov').getContext('2d'),n=S.n,s=560/n,O=S.O[S.k];c.clearRect(0,0,560,560);c.lineWidth=1.5;c.font='13px system-ui';
+ if($('cat').checked)O.forEach((o,i)=>{const cat=i>=S.nb;if(o.x<0||o.y<0||o.x>n||o.y>n||(!cat&&o.a<15))return;
+  c.strokeStyle=cat?'#ffb020':'rgba(120,200,255,.7)';c.beginPath();c.arc(o.x*s,o.y*s,cat?16:9,0,7);c.stroke();
+  if(cat){c.fillStyle='#ffb020';c.fillText(o.n,o.x*s+20,o.y*s+4);c.beginPath();c.setLineDash([3,4]);
+   S.O.forEach((P,j)=>{const w=P[i];j?c.lineTo(w.x*s,w.y*s):c.moveTo(w.x*s,w.y*s)});c.stroke();c.setLineDash([])}});
+ const o=O[S.sel];if(o){c.strokeStyle='#5eead4';c.strokeRect(o.x*s-13,o.y*s-13,26,26)}}
+function spec(){
+ const c=$('sp'),x=c.getContext('2d'),W=c.width,H=c.height,mu=getComputedStyle(document.documentElement).getPropertyValue('--mu'),o=S.O[S.k][S.sel];
+ x.clearRect(0,0,W,H);x.fillStyle=mu;x.strokeStyle=mu;x.font='12px system-ui';
+ if(!o){$('sn').textContent='Spectrum';x.fillText('Click a source in the image to see its 102-channel spectrum',12,H/2);return}
+ $('sn').textContent='Spectrum of '+o.n;if(!o.s){x.fillText(o.n+': spectra from live data are not wired up yet',12,H/2);return}
+ const t=S.T[S.k],R=rng(77+S.sel*13+S.k),Q=[];
+ DET.forEach(([a,b],d)=>{for(let j=0;j<17;j++){const l=a+(b-a)*(j+.5)/17,f=o.a*o.s(l)*(o.v?o.v(t,l):1)+5*gauss(R);Q.push([l,Math.log10(Math.max(f,1)),d])}});
+ const ym=Math.max(...Q.map(p=>p[1]),1.5),X=l=>40+(l-.75)/4.25*(W-55),Y=y=>H-28-y/ym*(H-44);
+ [1,2,3,4,5].forEach(l=>{x.fillText(l+' µm',X(l)-14,H-8);x.beginPath();x.moveTo(X(l),H-28);x.lineTo(X(l),H-24);x.stroke()});
+ x.fillText('log flux',4,12);x.beginPath();x.moveTo(40,H-28);x.lineTo(W-15,H-28);x.stroke();
+ Q.forEach(p=>{x.fillStyle=`hsl(${p[2]*50+190} 75% 55%)`;x.beginPath();x.arc(X(p[0]),Y(p[1]),3,0,7);x.fill()})}
+function meta(){
+ const k=S.k,t=S.T[k],det=$('det').value,N=+$('stk').value,ds=det==='all'?[0,1,2,3,4,5]:[+det],fl=new Set();
+ const dt=new Date(Date.UTC(2025,0,1)+(t-2025)*365.25*864e5).toISOString().slice(0,10);
+ for(let j=k;j<Math.min(K,k+N);j++)ds.forEach(d=>S.fl[j][d].forEach(f=>fl.add(f)));
+ $('ep').textContent='Visit '+(k+1)+' of '+K+', '+dt;
+ $('meta').innerHTML='<b>Band</b> '+(det==='all'?'0.75–5.0 µm':DET[+det].join('–')+' µm')+'<br><b>Visits added</b> '+N+'<br><b>Flags</b> '+(fl.size?[...fl].join(', '):'none')}
+function show(){draw();ovl();meta();spec();$('sl').value=S.k}
+async function live(ra,dec,fov,my){
+ const r=await fetch(`${API}/api/sky?ra=${ra}&dec=${dec}&fov=${fov}`);if(!r.ok)throw Error('server '+r.status);
+ const j=await r.json();if(my!==job)return true;
+ const b64=s=>{const b=atob(s),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return new Float32Array(u.buffer)};
+ S={ra,dec,fov,n:j.n,k:0,sel:-1,T:j.t,fl:j.flags,F:j.f.map(row=>row.map(b64)),nb:j.stars.length};
+ const cs=j.stars.concat(j.movers).map(c=>({ra:c[0],dec:c[1],pm:[c[2],c[3]],e:c[4],n:c[5],a:c[6]}));
+ S.O=S.T.map(t=>cs.map(o=>{const[a,b]=at(o,t),[x,y]=pix(a,b);return{x,y,a:o.a,n:o.n}}));
+ $('pill').textContent='live SPHEREx data';
+ $('ft').textContent='Live SPHEREx cutouts from IRSA, binned into 12 time steps per detector and resampled onto one grid. Overlays use Gaia and AllWISE positions moved to each date with their proper motions.';
+ return true}
+async function load(ra,dec,fov){
+ const my=++job;let ok=false;$('ep').textContent='Loading, live data can take a minute…';
+ if(API!==null){try{ok=await live(ra,dec,fov,my)}catch(e){console.warn(e);$('pill').textContent='live data failed, showing simulation'}}
+ if(my!==job)return;
+ if(!ok)sim(ra,dec,fov);
+ $('cv').width=$('cv').height=S.n;$('ra').value=ra.toFixed(5);$('dec').value=dec.toFixed(5);$('fov').value=fov;proc();show()}
+function usePre(p){pid=p[0];const Z=p[2].map(i=>at(CAT[i],2026.1));load(Z.reduce((s,q)=>s+q[0],0)/Z.length,Z.reduce((s,q)=>s+q[1],0)/Z.length,p[3])}
+$('det').innerHTML='<option value="all">All six detectors, summed</option>'+DET.map((r,i)=>`<option value="${i}">D${i+1}: ${r[0]}–${r[1]} µm</option>`).join('');
+PRE.forEach(p=>{const b=document.createElement('button');b.textContent=p[1];b.onclick=()=>{usePre(p);if(location.hash.slice(1)!==p[0])location.hash=p[0]};$('pre').appendChild(b)});
+const go=()=>{const ra=parse($('ra').value,1),dec=parse($('dec').value,0);if(isNaN(ra)||isNaN(dec)){$('ep').textContent='Could not read those coordinates. Try 133.795 -7.245 or 08h55m10.8s -7d14m42s.';return}pid='';load(ra,dec,+$('fov').value)};
+$('go').onclick=go;['ra','dec'].forEach(i=>$(i).onkeydown=e=>{if(e.key==='Enter')go()});
+['det','mode','stk'].forEach(i=>$(i).onchange=()=>{proc();show()});
+$('spd').onchange=e=>ms=+e.target.value;$('cat').onchange=ovl;
+$('sl').oninput=e=>{S.k=+e.target.value;show()};
+$('pl').onclick=()=>{play=!play;$('pl').textContent=play?'Pause':'Play'};
+$('ov').onclick=e=>{const r=e.target.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*S.n,y=(e.clientY-r.top)/r.height*S.n;let b=-1,bd=9;
+ S.O[S.k].forEach((o,i)=>{const d=(o.x-x)**2+(o.y-y)**2;if(d<bd){bd=d;b=i}});S.sel=b;ovl();spec()};
+addEventListener('hashchange',()=>{const p=PRE.find(p=>p[0]===location.hash.slice(1));if(p&&p[0]!==pid)usePre(p)});
+let last=0;(function tk(t){if(play&&S.F&&t-last>ms){last=t;S.k=(S.k+1)%K;show()}requestAnimationFrame(tk)})(0);
+const qs=new URLSearchParams(location.search);
+if(qs.has('ra')&&qs.has('dec'))load(parse(qs.get('ra'),1),parse(qs.get('dec'),0),+qs.get('fov')||4);
+else usePre(PRE.find(p=>p[0]===location.hash.slice(1))||PRE[0]);
+</script></body></html>
