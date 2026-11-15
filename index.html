@@ -323,7 +323,7 @@ async function live(ra,dec,fov,my){
  return true}
 async function load(ra,dec,fov){
  const my=++job;let ok=false;$('ep').textContent='Loading, live data can take a minute…';
- if(API!==null){try{ok=await live(ra,dec,fov,my)}catch(e){console.warn(e);$('pill').textContent='live data failed, showing simulation'}}
+ if(API!==null){try{ok=await live(ra,dec,fov,my)}catch(e){console.warn(e);$('pill').textContent='showing simulation'}}
  if(my!==job)return;
  if(!ok)sim(ra,dec,fov);
  $('cv').width=$('cv').height=S.n;$('ra').value=ra.toFixed(5);$('dec').value=dec.toFixed(5);$('fov').value=fov;proc();show()}
